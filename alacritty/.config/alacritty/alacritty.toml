@@ -1,0 +1,8 @@
+[terminal]
+shell = "/bin/zsh"
+
+[window]
+opacity = 0.97
+
+[font]
+normal = {family= "FiraMono Nerd Font Mono"}
