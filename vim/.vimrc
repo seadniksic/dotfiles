@@ -321,7 +321,7 @@ set termguicolors
 " For nms
 " set t_Co=256
 " colorscheme nms
-" set background=dark 
+" set background=dark
 
 colorscheme cobalt2
 let g:rigel_lightline = 1
@@ -345,20 +345,20 @@ function! ReplaceAndClearQF(args)
     " First character is the delimiter
     let delimiter = a:args[0]
     let rest = a:args[1:]
-    
+
     let parts = split(rest, delimiter, 1)
     if len(parts) < 2
         echo "Error: Format should be " . delimiter . "pattern" . delimiter . "replacement" . delimiter
         return
     endif
-    
+
     let pattern = parts[0]
     let replacement = parts[1]
-    
+
     " Escape pattern and replacement for literal matching
     let escaped_pattern = escape(pattern, '/\.*$^~[]')
     let escaped_replacement = escape(replacement, '/\&')
-    
+
     " Use \V for "very nomagic" - treats the pattern as literal text
     execute 'cfdo %s/\V' . escaped_pattern . '/' . escaped_replacement . '/g | update'
     cexpr []
@@ -369,20 +369,20 @@ function! ReplaceAndClearQFConfirm(args)
     " First character is the delimiter
     let delimiter = a:args[0]
     let rest = a:args[1:]
-    
+
     let parts = split(rest, delimiter, 1)
     if len(parts) < 2
         echo "Error: Format should be " . delimiter . "pattern" . delimiter . "replacement" . delimiter
         return
     endif
-    
+
     let pattern = parts[0]
     let replacement = parts[1]
-    
+
     " Escape pattern and replacement for literal matching
     let escaped_pattern = escape(pattern, '/\.*$^~[]')
     let escaped_replacement = escape(replacement, '/\&')
-    
+
     " Use \V for "very nomagic" - treats the pattern as literal text
     execute 'cfdo %s/\V' . escaped_pattern . '/' . escaped_replacement . '/gc | update'
     cexpr []
