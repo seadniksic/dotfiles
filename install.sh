@@ -58,6 +58,8 @@ git clone https://github.com/alacritty/alacritty-theme alacritty/.config/alacrit
 
 echo "[*] Stowing dotfiles..."
 
+# remove default created .zshrc
+rm ~/.zshrc
 sudo apt install stow
 stow --target="$HOME" alacritty nvim tmux zsh vim
 
