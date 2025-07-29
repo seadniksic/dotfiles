@@ -19,6 +19,13 @@ else
     echo "alacritty is already installed!"
 fi
 
+if ! command -v curl &> /dev/null; then
+    echo "installing curl..."
+    sudo apt install curl
+else
+    echo "curl is already installed!"
+fi
+
 # if zsh isn't installed
 if ! command -v zsh &> /dev/null; then
     echo "installing zsh..."
