@@ -70,7 +70,7 @@ echo "[*] Stowing dotfiles..."
 # remove default created .zshrc
 rm ~/.zshrc
 sudo apt install stow
-stow --target="$HOME" alacritty nvim tmux zsh vim
+stow --target="$HOME" alacritty nvim tmux zsh vim starship
 
 echo "[*] Installing Nerd Font"
 
