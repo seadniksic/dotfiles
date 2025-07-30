@@ -62,6 +62,10 @@ fi
 
 echo "[*] Configuring Themes..."
 
+if [-d "alacritty/.config/alacritty/themes"]; then
+    sudo rm -rf alacritty/.config/alacritty/themes
+fi
+
 mkdir alacritty/.config/alacritty/themes
 git clone https://github.com/alacritty/alacritty-theme alacritty/.config/alacritty/themes
 
