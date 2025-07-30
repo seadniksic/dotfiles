@@ -75,7 +75,7 @@ stow --target="$HOME" alacritty nvim tmux zsh vim starship
 echo "[*] Installing Nerd Font"
 
 #ngl this is all chatgpt
-NERD_FONT="FiraCode"
+NERD_FONT="FiraCode Nerd Font"
 VERSION="3.1.1"
 ZIP_URL="https://github.com/ryanoasis/nerd-fonts/releases/download/v${VERSION}/${NERD_FONT}.zip"
 TMP_DIR="/tmp/${NERD_FONT}-nerdfont"
