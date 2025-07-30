@@ -62,7 +62,7 @@ fi
 
 echo "[*] Configuring Themes..."
 
-if [-d "alacritty/.config/alacritty/themes"]; then
+if [ -d "alacritty/.config/alacritty/themes" ]; then
     sudo rm -rf alacritty/.config/alacritty/themes
 fi
 
