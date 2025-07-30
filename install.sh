@@ -47,7 +47,7 @@ fi
 
 # install nvim
 curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
-sudo rm -rf /opt/nvim
+sudo rm -rf /opt/nvim /usr/local/bin/nvim
 sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz
 sudo mv /opt/nvim-linux-x86_64 /opt/nvim
 sudo ln -s /opt/nvim/bin/nvim /usr/local/bin/nvim
@@ -74,7 +74,7 @@ stow --target="$HOME" alacritty nvim tmux zsh vim starship
 
 echo "[*] Installing Nerd Font"
 
-#ngl this is all chatgpt
+#ngl this font shit is all chatgpt
 NERD_FONT="FiraCode Nerd Font"
 VERSION="3.1.1"
 ZIP_URL="https://github.com/ryanoasis/nerd-fonts/releases/download/v${VERSION}/${NERD_FONT}.zip"
