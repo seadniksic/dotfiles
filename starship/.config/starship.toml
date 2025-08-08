@@ -1,6 +1,6 @@
  add_newline = false 
 
-format = "$username$directory$c$cpp$java$python$git_branch$git_status$docker_context[❯](fg:#b291eb) "
+format = "$username$directory$c$cpp$java$python$git_branch$git_status$docker_context[❯](fg:#92BF83) "
 
 #[character]
 #success_symbol = "[➜](bold green) "
@@ -38,12 +38,12 @@ format = "$username$directory$c$cpp$java$python$git_branch$git_status$docker_con
 # You can also replace your username with a neat symbol like  to save some space
 [username]
 show_always = true
-#style_user = "bg:#3B4252"
+style_user = "fg:#FFFFFF"
 #style_root = "bg:#3B4252"
 format = '[ $user ]($style)'
 
 [directory]
-#style = "bg:#434C5E"
+style = "fg:#8AB7E1"
 format = "[ $path ]($style)"
 truncation_length = 3
 truncation_symbol = "…/"
@@ -88,11 +88,11 @@ format = '[ $symbol $context ]($style) $path'
 
 [git_branch]
 symbol = ""
-#style = "bg:#4C566A"
+style = "fg:#6DF9F2"
 format = '[ $symbol $branch ]($style)'
 
 [git_status]
-#style = "bg:#4C566A"
+style = "fg:#B45858"
 staged = ""
 format = '[$all_status ]($style)'
 
