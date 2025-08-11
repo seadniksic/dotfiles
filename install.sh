@@ -11,6 +11,14 @@ else
     echo "snap is already installed!"
 fi
 
+if ! command -v alacritty &> /dev/null; then
+    echo "installing alacritty..."
+    #install alacritty
+    sudo snap install alacritty --classic
+else
+    echo "alacritty is already installed!"
+fi
+
 if ! command -v tmux &> /dev/null; then
     echo "installing tmux..."
     sudo apt install tmux
