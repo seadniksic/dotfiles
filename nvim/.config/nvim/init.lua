@@ -20,12 +20,15 @@ vim.opt.guicursor = "n-v-c-sm:block,i-ci-ve:block,r-cr-o:block"
 --Add numbers to each line on the left-hand side.
 vim.opt.number=true
 --Set shift width to 4 spaces.
-vim.opt.shiftwidth=4
+vim.opt.shiftwidth=2
 
 --Set tab width to 4 columns.  vim.opt.tabstop=4 --Use space characters instead of tabs.
 vim.opt.expandtab=true
 
-vim.opt.tabstop=4
+vim.opt.tabstop=2
+vim.opt.softtabstop = 2
+vim.opt.autoindent = true
+vim.opt.smartindent = true
 
 --Do not wrap lines. Allow long lines to extend as far as the line goes.
 vim.opt.wrap=false
