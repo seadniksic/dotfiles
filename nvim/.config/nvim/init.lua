@@ -102,6 +102,17 @@ require('lazy').setup({
   -- 'tpope/vim-fugitive',
   -- 'tpope/vim-rhubarb',
 
+  {
+    'sindrets/diffview.nvim',
+    dependencies = { 'nvim-lua/plenary.nvim' },
+    cmd = { 'DiffviewOpen', 'DiffviewClose', 'DiffviewFileHistory', 'DiffviewToggleFiles', 'DiffviewFocusFiles' },
+    keys = {
+      { '<leader>gd', '<cmd>DiffviewOpen<CR>', desc = 'Git [D]iff view' },
+      { '<leader>gh', '<cmd>DiffviewFileHistory<CR>', desc = 'Git file [H]istory' },
+      { '<leader>gc', '<cmd>DiffviewClose<CR>', desc = 'Git diff [C]lose' },
+    },
+  },
+
   -- Detect tabstop and shiftwidth automatically
   -- 'tpope/vim-sleuth',
 
