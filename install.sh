@@ -33,18 +33,6 @@ else
     echo "curl is already installed!"
 fi
 
-# if zsh isn't installed
-if ! command -v zsh &> /dev/null; then
-    echo "installing zsh..."
-    #install zsh
-    sudo apt install zsh
-
-    #install oh my zsh
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-else
-    echo "zsh is already installed!"
-fi
-
 # install nvim
 curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
 sudo rm -rf /opt/nvim /usr/local/bin/nvim
@@ -71,10 +59,15 @@ git clone https://github.com/alacritty/alacritty-theme alacritty/.config/alacrit
 
 echo "[*] Stowing dotfiles..."
 
-# remove default created .zshrc
-rm ~/.zshrc
 sudo apt install stow
 stow --target="$HOME" alacritty nvim tmux zsh vim starship
+
+echo "[*] Installing tmux plugins (TPM)..."
+
+if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
+    git clone https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm"
+fi
+"$HOME/.tmux/plugins/tpm/scripts/install_plugins.sh"
 
 echo "[*] Installing Nerd Font"
 

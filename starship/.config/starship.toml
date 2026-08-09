@@ -1,4 +1,4 @@
- add_newline = false 
+add_newline = false 
 
 format = "$username$directory$c$cpp$java$python$git_branch$git_status$docker_context[❯](fg:#92BF83) "
 

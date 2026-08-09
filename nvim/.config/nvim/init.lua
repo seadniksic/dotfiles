@@ -257,29 +257,90 @@ require('lazy').setup({
  --    },
  --  },
 
-  -- {
-  --   -- Theme inspired by Atom
-  --   'navarasu/onedark.nvim',
-  --   priority = 1000,
-  --   opts = {
-  --     style = 'cool',
-  --   },
-  --   config = function(_, opts)
-  --     require("onedark").setup(opts)
-  --     vim.cmd.colorscheme 'onedark'
-  --   end,
-  -- },
+  {
+    'projekt0n/github-nvim-theme',
+    priority = 1000,
+    config = function()
+      require('github-theme').setup {
+        options = {
+          transparent = true,
+          darken = {
+            sidebars = { enable = false },
+          },
+        },
+      }
+      vim.cmd.colorscheme 'github_dark_default'
+
+      vim.api.nvim_set_hl(0, '@keyword', { fg = '#1382a1' })
+      vim.api.nvim_set_hl(0, '@keyword.function', { fg = '#1382a1' })
+      vim.api.nvim_set_hl(0, '@string', { fg = '#FFDD88' })
+
+      -- match rust-analyzer's semantic token color for types from VS Code
+      vim.api.nvim_set_hl(0, '@type', { fg = '#4ec9b0' })
+      vim.api.nvim_set_hl(0, '@type.builtin', { fg = '#4ec9b0' })
+
+      -- visible divider between the file explorer and the editor
+      vim.api.nvim_set_hl(0, 'WinSeparator', { fg = '#3994bc' })
+      vim.api.nvim_set_hl(0, 'NvimTreeWinSeparator', { fg = '#3994bc' })
+    end,
+  },
 
   {
   --   -- Set lualine as statusline
     'nvim-lualine/lualine.nvim',
     -- See `:help lualine.txt`
+    opts = function()
+      return {
+        options = {
+          icons_enabled = false,
+          theme = require('github-theme.util.lualine')('github_dark_default'),
+          component_separators = '|',
+          section_separators = '',
+          globalstatus = true,
+        },
+        sections = {
+          lualine_c = {
+            { 'filename', path = 3 },
+          },
+        },
+        winbar = {
+          lualine_c = {
+            { 'filename', path = 3, color = { gui = 'bold' } },
+            { 'filetype', icon_only = true, icons_enabled = true, icon = { align = 'right' }, colored = true },
+          },
+        },
+        inactive_winbar = {
+          lualine_c = {
+            { 'filename', path = 3, color = { gui = 'bold' } },
+            { 'filetype', icon_only = true, icons_enabled = true, icon = { align = 'right' }, colored = true },
+          },
+        },
+      }
+    end,
+  },
+
+  {
+    'akinsho/bufferline.nvim',
+    version = '*',
+    dependencies = { 'nvim-tree/nvim-web-devicons' },
     opts = {
       options = {
-        icons_enabled = false,
-        theme = 'onedark',
-        component_separators = '|',
-        section_separators = '',
+        mode = 'tabs',
+        name_formatter = function(tab)
+          local ok, custom_name = pcall(vim.api.nvim_tabpage_get_var, tab.tabnr, 'name')
+          if ok and custom_name and custom_name ~= '' then
+            return custom_name
+          end
+          return 'Tab ' .. tab.tabnr
+        end,
+        offsets = {
+          {
+            filetype = 'NvimTree',
+            text = 'File Explorer',
+            highlight = 'Directory',
+            text_align = 'left',
+          },
+        },
       },
     },
   },
@@ -329,14 +390,25 @@ require('lazy').setup({
     },
   },
 
-  -- {
-  --   -- Highlight, edit, and navigate code
-  --   'nvim-treesitter/nvim-treesitter',
-  --   dependencies = {
-  --     'nvim-treesitter/nvim-treesitter-textobjects',
-  --   },
-  --   build = ':TSUpdate',
-  -- },
+  {
+    'nvim-treesitter/nvim-treesitter',
+    branch = 'main',
+    build = ':TSUpdate',
+    lazy = false,
+    config = function()
+      require('nvim-treesitter').install {
+        'c', 'cpp', 'lua', 'python', 'rust', 'bash',
+        'json', 'yaml', 'markdown', 'markdown_inline',
+        'vim', 'vimdoc', 'query',
+      }
+      vim.api.nvim_create_autocmd('FileType', {
+        pattern = '*',
+        callback = function()
+          pcall(vim.treesitter.start)
+        end,
+      })
+    end,
+  },
 
 }, {})
 
@@ -344,6 +416,10 @@ require('lazy').setup({
 --
 -- activate modules that were added by lazy
 --
+
+-- nvim-cmp supports additional completion capabilities, so broadcast that to servers
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
 
 require('mason').setup()
 require('mason-lspconfig').setup({
@@ -423,17 +499,15 @@ local servers = {
   },
 }
 
-local mason_lspconfig = require 'mason-lspconfig'
-mason_lspconfig.setup_handlers {
-  function(server_name)
-    require('lspconfig')[server_name].setup {
-      capabilities = capabilities,
-      on_attach = on_attach,
-      settings = servers[server_name],
-      filetypes = (servers[server_name] or {}).filetypes,
-    }
-  end,
-}
+for server_name, server_settings in pairs(servers) do
+  vim.lsp.config(server_name, {
+    capabilities = capabilities,
+    on_attach = on_attach,
+    settings = server_settings,
+    filetypes = server_settings.filetypes,
+  })
+  vim.lsp.enable(server_name)
+end
 
 
 require("nvim-tree").setup({
@@ -449,9 +523,32 @@ require("nvim-tree").setup({
   filters = {
     dotfiles = true,
   },
+  actions = {
+    change_dir = {
+      global = true,
+    },
+  },
+  update_focused_file = {
+    enable = true,
+    update_root = {
+      enable = true,
+    },
+  },
+  tab = {
+    sync = {
+      open = true,
+      close = false,
+    },
+  },
 })
 
 vim.keymap.set('n', '<C-n>', ":NvimTreeToggle<CR>", { desc = 'Toggles NvimTree' })
+
+vim.keymap.set('n', '<leader>fp', function()
+  local path = vim.fn.expand '%:p'
+  vim.fn.setreg('+', path)
+  print(path)
+end, { desc = '[F]ile [P]ath: show and copy full path' })
 
 require('telescope').setup {
   defaults = {
@@ -460,6 +557,9 @@ require('telescope').setup {
         ['<C-u>'] = false,
         ['<C-d>'] = false,
       },
+    },
+    preview = {
+      treesitter = false,
     },
   },
   pickers = {
@@ -476,6 +576,32 @@ pcall(require('telescope').load_extension, 'fzf')
 -- See `:help telescope.builtin`
 vim.keymap.set('n', '<leader>?', require('telescope.builtin').oldfiles, { desc = '[?] Find recently opened files' })
 vim.keymap.set('n', '<leader><space>', require('telescope.builtin').buffers, { desc = '[ ] Find existing buffers' })
+
+vim.keymap.set('n', '<Tab>', ':tabnext<CR>', { desc = 'Next tab (workspace)' })
+vim.keymap.set('n', '<S-Tab>', ':tabprevious<CR>', { desc = 'Previous tab (workspace)' })
+
+vim.keymap.set('n', '<C-t>', ':tabnew<CR>', { desc = 'Open new tab (workspace)' })
+
+vim.keymap.set('n', '<C-Space>h', ':wincmd h<CR>', { desc = 'Move to left pane' })
+vim.keymap.set('n', '<C-Space>l', ':wincmd l<CR>', { desc = 'Move to right pane' })
+vim.keymap.set('n', '<C-Space>j', ':wincmd j<CR>', { desc = 'Move to pane below' })
+vim.keymap.set('n', '<C-Space>k', ':wincmd k<CR>', { desc = 'Move to pane above' })
+vim.keymap.set('n', '<C-Space><C-h>', ':wincmd h<CR>', { desc = 'Move to left pane' })
+vim.keymap.set('n', '<C-Space><C-l>', ':wincmd l<CR>', { desc = 'Move to right pane' })
+vim.keymap.set('n', '<C-Space><C-j>', ':wincmd j<CR>', { desc = 'Move to pane below' })
+vim.keymap.set('n', '<C-Space><C-k>', ':wincmd k<CR>', { desc = 'Move to pane above' })
+
+vim.keymap.set('n', '<C-w>h', ':tabprevious<CR>', { desc = 'Cycle to previous tab (workspace)' })
+vim.keymap.set('n', '<C-w>l', ':tabnext<CR>', { desc = 'Cycle to next tab (workspace)' })
+
+vim.keymap.set('n', '<leader>tr', function()
+  vim.ui.input({ prompt = 'Rename tab: ' }, function(name)
+    if name and name ~= '' then
+      vim.cmd('BufferLineTabRename ' .. name)
+    end
+  end)
+end, { desc = '[T]ab [R]ename' })
+
 vim.keymap.set('n', '<leader>/', function()
   -- You can pass additional configuration to telescope to change theme, layout, etc.
   require('telescope.builtin').current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
@@ -565,10 +691,6 @@ vim.api.nvim_create_user_command("Rcc", function(opts)
   replace_and_clear_qf(opts.args, true)
 end, { nargs = 1 })
 
-
--- nvim-cmp supports additional completion capabilities, so broadcast that to servers
-local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
 
 local cmp = require 'cmp'
 local luasnip = require 'luasnip'
