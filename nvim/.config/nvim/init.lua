@@ -473,6 +473,11 @@ local on_attach = function(_, bufnr)
     print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
   end, '[W]orkspace [L]ist Folders')
 
+  -- Toggle inlay hints (rust-analyzer shows type/param hints; can be noisy)
+  nmap('<leader>ih', function()
+    vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = bufnr }, { bufnr = bufnr })
+  end, 'Toggle [I]nlay [H]ints')
+
   -- Create a command `:Format` local to the LSP buffer
   vim.api.nvim_buf_create_user_command(bufnr, 'Format', function(_)
     vim.lsp.buf.format()
@@ -506,6 +511,44 @@ local servers = {
       telemetry = { enable = false },
       -- NOTE: toggle below to ignore Lua_LS's noisy `missing-fields` warnings
       -- diagnostics = { disable = { 'missing-fields' } },
+    },
+  },
+
+  -- rust-analyzer is installed via `rustup component add rust-analyzer`, so it
+  -- rides the active toolchain rather than being pinned by mason.
+  rust_analyzer = {
+    ['rust-analyzer'] = {
+      -- Flycheck (the on-save `cargo` run) is the slow part of the loop, not
+      -- indexing. Measured on navguard-interface-rs (16 cores): clippy 5.5s vs
+      -- check 3.3s on a one-line edit, at only ~115% CPU -- a single leaf crate
+      -- can't parallelize, so throwing more cores at it does nothing.
+      --
+      -- `check` over `clippy` trades style lints for ~40% faster diagnostics.
+      -- Swap back to 'clippy' if you want the extra lints; run it in a terminal
+      -- before pushing either way, since CI lints with clippy.
+      checkOnSave = true,
+      check = {
+        command = 'check',
+        -- Give flycheck its own target dir. Without this it shares
+        -- target/debug/.cargo-lock with terminal cargo commands, so a manual
+        -- `cargo build` and an on-save check block each other -- which reads
+        -- as a random multi-second editor stall.
+        extraArgs = { '--target-dir', 'target/rust-analyzer' },
+      },
+      cargo = {
+        -- Build scripts and proc macros must run for generated code (e.g.
+        -- prost/tonic protobuf types) to resolve. Without these, anything
+        -- behind a macro shows up as an unresolved-import error.
+        buildScripts = { enable = true },
+      },
+      procMacro = { enable = true },
+      -- Type/param inlay hints are off by default in rust-analyzer; enable the
+      -- useful ones. Toggle at runtime with <leader>ih (mapped below).
+      inlayHints = {
+        typeHints = { enable = true },
+        parameterHints = { enable = true },
+        chainingHints = { enable = true },
+      },
     },
   },
 }
@@ -588,10 +631,26 @@ pcall(require('telescope').load_extension, 'fzf')
 vim.keymap.set('n', '<leader>?', require('telescope.builtin').oldfiles, { desc = '[?] Find recently opened files' })
 vim.keymap.set('n', '<leader><space>', require('telescope.builtin').buffers, { desc = '[ ] Find existing buffers' })
 
-vim.keymap.set('n', '<Tab>', ':tabnext<CR>', { desc = 'Next tab (workspace)' })
-vim.keymap.set('n', '<S-Tab>', ':tabprevious<CR>', { desc = 'Previous tab (workspace)' })
-
+-- NOTE: do not map <Tab> in normal mode. Terminals send the same byte (0x09)
+-- for <Tab> and <C-i>, so an nmap on <Tab> also swallows <C-i>, breaking
+-- jump-forward in the jumplist. Use the builtin gt / gT / {count}gt for tabs.
 vim.keymap.set('n', '<C-t>', ':tabnew<CR>', { desc = 'Open new tab (workspace)' })
+
+-- Ctrl+/ to toggle comments, using nvim's builtin commenting (0.10+): `gc` is
+-- an operator (normal + visual) and `gcc` does the current line. No plugin.
+--
+-- Terminals disagree on what Ctrl+/ transmits: most (Alacritty included) send
+-- 0x1f, which nvim spells <C-_>. Some newer ones send a literal <C-/> instead.
+-- Map both so this survives a terminal change.
+--
+-- Visual mode uses plain 'gc' (not 'gcc'): the operator already applies to the
+-- selection, whereas 'gcc' in a visual range comments only the first line.
+for _, key in ipairs { '<C-_>', '<C-/>' } do
+  vim.keymap.set('n', key, 'gcc', { remap = true, desc = 'Toggle comment line' })
+  vim.keymap.set('x', key, 'gc', { remap = true, desc = 'Toggle comment selection' })
+  -- Comment the current line and return to insert at the same spot.
+  vim.keymap.set('i', key, '<C-o>gcc', { remap = true, desc = 'Toggle comment line' })
+end
 
 vim.keymap.set('n', '<C-Space>h', ':wincmd h<CR>', { desc = 'Move to left pane' })
 vim.keymap.set('n', '<C-Space>l', ':wincmd l<CR>', { desc = 'Move to right pane' })
