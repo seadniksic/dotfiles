@@ -41,6 +41,14 @@ sudo mv /opt/nvim-linux-x86_64 /opt/nvim
 sudo ln -s /opt/nvim/bin/nvim /usr/local/bin/nvim
 sudo rm nvim-linux-x86_64.tar.gz
 
+if ! command -v tectonic &> /dev/null; then
+    echo "installing tectonic..."
+    curl --proto '=https' --tlsv1.2 -fsSL https://drop-sh.fullyjustified.net | sh
+    sudo mv ./tectonic /usr/local/bin/tectonic
+else
+    echo "tectonic is already installed!"
+fi
+
 if ! command -v starship &> /dev/null; then
     #install starship for prompt customization
     curl -sS https://starship.rs/install.sh | sh
@@ -64,10 +72,22 @@ stow --target="$HOME" alacritty nvim tmux zsh vim starship
 
 echo "[*] Installing tmux plugins (TPM)..."
 
-if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
-    git clone https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm"
+TPM_DIR="$HOME/.tmux/plugins/tpm"
+
+if [ ! -d "$TPM_DIR" ]; then
+    echo "cloning tpm..."
+    git clone https://github.com/tmux-plugins/tpm "$TPM_DIR"
+else
+    echo "tpm is already installed, updating..."
+    git -C "$TPM_DIR" pull --ff-only
 fi
-"$HOME/.tmux/plugins/tpm/scripts/install_plugins.sh"
+
+# TPM reads the plugin list off a live tmux server, so make sure one is up
+# and has sourced the stowed .tmux.conf before asking it to install.
+tmux start-server
+tmux source-file "$HOME/.tmux.conf"
+"$TPM_DIR/scripts/install_plugins.sh"
+tmux source-file "$HOME/.tmux.conf"
 
 echo "[*] Installing Nerd Font"
 

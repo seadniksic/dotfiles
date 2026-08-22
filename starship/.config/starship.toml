@@ -1,4 +1,4 @@
-add_newline = false 
+add_newline = false
 
 format = "$username$directory$c$cpp$java$python$git_branch$git_status$docker_context[❯](fg:#92BF83) "
 
@@ -136,7 +136,7 @@ format = '[(\($virtualenv\) )]($style)'
 #format = '[ $symbol ($version) ]($style)'
 
 [time]
-disabled = true 
+disabled = true
 time_format = "%R" # Hour:Minute Format
 #style = "bg:#33658A"
 format = '[ $time ]($style)'

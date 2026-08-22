@@ -402,6 +402,30 @@ require('lazy').setup({
   },
 
   {
+    'lervag/vimtex',
+    lazy = false, -- vimtex needs to be loaded eagerly to set up its ftplugin/syntax hooks
+    init = function()
+      -- VimTeX recommended minimal configuration (:help vimtex-requirements)
+      vim.g.vimtex_view_method = 'general'
+      vim.g.vimtex_view_general_viewer = 'evince'
+      -- Use tectonic instead of the default latexmk backend (installed via install.sh)
+      vim.g.vimtex_compiler_method = 'tectonic'
+
+      -- vimtex's tectonic backend runs one shot compile (no `latexmk -pvc`-style
+      -- watch loop), so `:VimtexCompile`'s continuous mode has nothing to keep
+      -- running. Recompile on save instead; evince auto-reloads the PDF.
+      vim.api.nvim_create_autocmd('BufWritePost', {
+        pattern = '*.tex',
+        callback = function()
+          if vim.fn.exists(':VimtexCompileSS') == 2 then
+            vim.cmd 'VimtexCompileSS'
+          end
+        end,
+      })
+    end,
+  },
+
+  {
     'nvim-treesitter/nvim-treesitter',
     branch = 'main',
     build = ':TSUpdate',
@@ -584,9 +608,7 @@ require("nvim-tree").setup({
   },
   update_focused_file = {
     enable = true,
-    update_root = {
-      enable = true,
-    },
+    update_root = true,
   },
   tab = {
     sync = {
