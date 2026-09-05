@@ -68,7 +68,7 @@ git clone https://github.com/alacritty/alacritty-theme alacritty/.config/alacrit
 echo "[*] Stowing dotfiles..."
 
 sudo apt install stow
-stow --target="$HOME" alacritty nvim tmux zsh vim starship
+stow --target="$HOME" alacritty nvim tmux zsh vim starship bash
 
 echo "[*] Installing tmux plugins (TPM)..."
 
